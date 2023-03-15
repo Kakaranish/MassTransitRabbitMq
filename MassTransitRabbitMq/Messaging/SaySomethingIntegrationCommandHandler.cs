@@ -13,6 +13,8 @@ public class SaySomethingIntegrationCommandHandler : IConsumer<SaySomethingInteg
 
     public Task Consume(ConsumeContext<SaySomethingIntegrationCommand> context)
     {
+        throw new InvalidOperationException();
+        
         _logger.LogInformation("Consumed message: {MessageId} | AddedAt: {AddedAt} | Content: {Content}",
             context.MessageId, context.Message.AddedAt, context.Message.ContentToSay);
 

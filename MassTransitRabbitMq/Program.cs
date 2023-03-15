@@ -1,5 +1,6 @@
 using MassTransit;
 using MassTransitRabbitMq.Configuration;
+using MassTransitRabbitMq.Filters;
 using MassTransitRabbitMq.Messaging;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -19,9 +20,17 @@ builder.Services.AddMassTransit(configurator =>
             hostConfigurator.Username(rabbitMqConfig.Username);
             hostConfigurator.Password(rabbitMqConfig.Password);
         });
+        
         rabbitConfigurator.ReceiveEndpoint(Endpoints.AppWorker, endpointConfigurator =>
         {
+            endpointConfigurator.UseConsumeFilter(typeof(ExceptionAuditFilter<>), rabbitContext);
+            
             endpointConfigurator.ConfigureConsumer<SaySomethingIntegrationCommandHandler>(rabbitContext);
+            endpointConfigurator.UseRetry(r =>
+            {
+                r.Handle<Exception>();
+                r.Interval(2, TimeSpan.FromSeconds(5));
+            });
         });
     });
 });
