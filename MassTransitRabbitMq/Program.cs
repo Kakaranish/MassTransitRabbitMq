@@ -2,6 +2,8 @@ using MassTransit;
 using MassTransitRabbitMq.Configuration;
 using MassTransitRabbitMq.Filters;
 using MassTransitRabbitMq.Messaging;
+using MassTransitRabbitMq.Persistence;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -9,9 +11,15 @@ builder.Services.AddControllers();
 var rabbitMqConfig = new RabbitMqConfiguration();
 builder.Configuration.GetSection("RabbitMq").Bind(rabbitMqConfig);
 
+var postgresConnStr = builder.Configuration.GetValue<string>("Database:ConnectionString");
+builder.Services.AddDbContext<AppDbContext>(optionsBuilder =>
+{
+    optionsBuilder.UseNpgsql(postgresConnStr);
+});
+
 builder.Services.AddMassTransit(configurator =>
 {
-    configurator.AddConsumer<SaySomethingIntegrationCommandHandler>();
+    configurator.AddConsumer<AddPersonIntegrationCommandHandler>();
     
     configurator.UsingRabbitMq((rabbitContext, rabbitConfigurator) =>
     {
@@ -25,7 +33,7 @@ builder.Services.AddMassTransit(configurator =>
         {
             endpointConfigurator.UseConsumeFilter(typeof(ExceptionAuditFilter<>), rabbitContext);
             
-            endpointConfigurator.ConfigureConsumer<SaySomethingIntegrationCommandHandler>(rabbitContext);
+            endpointConfigurator.ConfigureConsumer<AddPersonIntegrationCommandHandler>(rabbitContext);
             endpointConfigurator.UseRetry(r =>
             {
                 r.Handle<Exception>();

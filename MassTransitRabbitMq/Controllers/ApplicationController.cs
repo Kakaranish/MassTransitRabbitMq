@@ -18,18 +18,26 @@ public class ApplicationController : ControllerBase
         _sendEndpointProvider = sendEndpointProvider;
     }
 
-    [HttpPost("message")]
-    public async Task AddMessage()
+    [HttpPost("person")]
+    public async Task AddPerson([FromBody] AddPersonDto addPersonDto)
     {
-        var command = new SaySomethingIntegrationCommand
+        var sendEndpoint = await _sendEndpointProvider.GetSendEndpoint(new Uri($"queue:{Endpoints.AppWorker}"));
+        var addPersonIntegrationCmd = new AddPersonIntegrationCommand
         {
-            AddedAt = DateTime.UtcNow,
-            ContentToSay = "Hello world from application controller"
+            FirstName = addPersonDto.FirstName,
+            LastName = addPersonDto.LastName,
+            DateOfBirth = addPersonDto.DateOfBirth
         };
         
-        var sendEndpoint = await _sendEndpointProvider.GetSendEndpoint(new Uri($"queue:{Endpoints.AppWorker}"));
-        await sendEndpoint.Send(command);
+        await sendEndpoint.Send(addPersonIntegrationCmd);
         
         _logger.LogInformation("Published message");
+    }
+
+    public class AddPersonDto
+    {
+        public string FirstName { get; set; }
+        public string LastName { get; set; }
+        public DateOnly DateOfBirth { get; set; }
     }
 }
