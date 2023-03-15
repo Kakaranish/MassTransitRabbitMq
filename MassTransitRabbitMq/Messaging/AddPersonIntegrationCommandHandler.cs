@@ -20,8 +20,6 @@ public class AddPersonIntegrationCommandHandler : IConsumer<AddPersonIntegration
     {
         _logger.LogInformation("Handling message with id = {MessageId}", context.MessageId);
 
-        var transaction = await _appDbContext.Database.BeginTransactionAsync(context.CancellationToken);
-        
         var person = new Person
         {
             FirstName = context.Message.FirstName,
@@ -31,8 +29,6 @@ public class AddPersonIntegrationCommandHandler : IConsumer<AddPersonIntegration
         
         _appDbContext.Add(person);
         await _appDbContext.SaveChangesAsync(context.CancellationToken);
-
-        await transaction.CommitAsync(context.CancellationToken);
         
         _logger.LogInformation("Created user with id = {UserId}", person.Id);
     }

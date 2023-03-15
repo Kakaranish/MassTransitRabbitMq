@@ -1,4 +1,5 @@
 using MassTransit;
+using MassTransit.EntityFrameworkCoreIntegration;
 using MassTransitRabbitMq.Configuration;
 using MassTransitRabbitMq.Filters;
 using MassTransitRabbitMq.Messaging;
@@ -20,7 +21,11 @@ builder.Services.AddDbContext<AppDbContext>(optionsBuilder =>
 builder.Services.AddMassTransit(configurator =>
 {
     configurator.AddConsumer<AddPersonIntegrationCommandHandler>();
-    configurator.AddEntityFrameworkOutbox<AppDbContext>();
+    configurator.AddEntityFrameworkOutbox<AppDbContext>(outboxConfigurator =>
+    {
+        outboxConfigurator.UseBusOutbox();
+        outboxConfigurator.LockStatementProvider = new PostgresLockStatementProvider();
+    });
     
     configurator.UsingRabbitMq((rabbitContext, rabbitConfigurator) =>
     {

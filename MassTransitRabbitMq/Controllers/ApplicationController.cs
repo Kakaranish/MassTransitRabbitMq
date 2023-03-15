@@ -1,5 +1,6 @@
 using MassTransit;
 using MassTransitRabbitMq.Messaging;
+using MassTransitRabbitMq.Persistence;
 using Microsoft.AspNetCore.Mvc;
 
 namespace MassTransitRabbitMq.Controllers;
@@ -10,12 +11,15 @@ public class ApplicationController : ControllerBase
 {
     private readonly ILogger<ApplicationController> _logger;
     private readonly ISendEndpointProvider _sendEndpointProvider;
+    private readonly AppDbContext _appDbContext;
 
     public ApplicationController(ILogger<ApplicationController> logger, 
-        ISendEndpointProvider sendEndpointProvider)
+        ISendEndpointProvider sendEndpointProvider,
+        AppDbContext appDbContext)
     {
         _logger = logger;
         _sendEndpointProvider = sendEndpointProvider;
+        _appDbContext = appDbContext;
     }
 
     [HttpPost("person")]
@@ -30,6 +34,8 @@ public class ApplicationController : ControllerBase
         };
         
         await sendEndpoint.Send(addPersonIntegrationCmd);
+
+        await _appDbContext.SaveChangesAsync();
         
         _logger.LogInformation("Published message");
     }
