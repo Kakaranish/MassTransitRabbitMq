@@ -20,6 +20,7 @@ builder.Services.AddDbContext<AppDbContext>(optionsBuilder =>
 builder.Services.AddMassTransit(configurator =>
 {
     configurator.AddConsumer<AddPersonIntegrationCommandHandler>();
+    configurator.AddEntityFrameworkOutbox<AppDbContext>();
     
     configurator.UsingRabbitMq((rabbitContext, rabbitConfigurator) =>
     {
@@ -31,6 +32,8 @@ builder.Services.AddMassTransit(configurator =>
         
         rabbitConfigurator.ReceiveEndpoint(Endpoints.AppWorker, endpointConfigurator =>
         {
+            endpointConfigurator.UseEntityFrameworkOutbox<AppDbContext>(rabbitContext);
+            
             endpointConfigurator.UseConsumeFilter(typeof(ExceptionAuditFilter<>), rabbitContext);
             
             endpointConfigurator.ConfigureConsumer<AddPersonIntegrationCommandHandler>(rabbitContext);
