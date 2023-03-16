@@ -44,9 +44,10 @@ public static class MassTransitRegistrationExtensions
                             consumerConfigurator.UseFilter(new ExceptionAuditConsumerFilter<AddPersonIntegrationCommandHandler>());
                             
                             // --- IMPORTANT PLACE ---------------------------------------------------------------------
-                            // Message retry is set on receive endpoint level
-                            // Everything works as expected; outbox transaction is rolled back in EntityFrameworkOutboxContextFactory, each time retry is raised
-                            endpointConfigurator.UseMessageRetry(r =>
+                            // Message retry is set on consumer level
+                            // Transaction (in EntityFrameworkOutboxContextFactory) is roll-backed only once - after all retries
+                            // Thus ApplicationDbContext is dirty when doing retries
+                            consumerConfigurator.UseMessageRetry(r =>
                             {
                                 r.Handle<Exception>();
                                 r.Interval(2, TimeSpan.FromSeconds(10));
