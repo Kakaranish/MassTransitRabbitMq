@@ -2,7 +2,7 @@ using MassTransit;
 
 namespace MassTransitRabbitMq.Filters;
 
-public class ExceptionAuditConsumerFilter<THandler> : IFilter<ConsumerConsumeContext<THandler>> where THandler : class 
+public class HandlerTypeForwarderFilter<THandler> : IFilter<ConsumerConsumeContext<THandler>> where THandler : class 
 {
     public async Task Send(ConsumerConsumeContext<THandler> context, IPipe<ConsumerConsumeContext<THandler>> next)
     {
@@ -10,10 +10,10 @@ public class ExceptionAuditConsumerFilter<THandler> : IFilter<ConsumerConsumeCon
         {
             await next.Send(context);
         }
-        catch (Exception)
+        finally
         {
-            Console.WriteLine("Exception was caught and rethrown by ExceptionAuditConsumerFilter");
-            throw;
+            var handlerContext = context.GetPayload<HandlerContextPayload>();
+            handlerContext.SetHandlerType<THandler>();
         }
     }
 
