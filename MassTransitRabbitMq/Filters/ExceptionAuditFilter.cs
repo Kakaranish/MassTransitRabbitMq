@@ -18,7 +18,7 @@ public class ExceptionAuditFilter<T> : IFilter<ConsumeContext<T>>
         {
             await next.Send(context);
         }
-        catch (Exception e)
+        catch (Exception)
         {
             _logger.LogInformation("Exception was caught and rethrown by ExceptionAuditFilter");
             throw;

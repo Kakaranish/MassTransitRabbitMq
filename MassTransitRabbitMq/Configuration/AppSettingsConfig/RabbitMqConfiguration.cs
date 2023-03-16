@@ -1,4 +1,4 @@
-namespace MassTransitRabbitMq.Configuration;
+namespace MassTransitRabbitMq.Configuration.AppSettingsConfig;
 
 public class RabbitMqConfiguration
 {

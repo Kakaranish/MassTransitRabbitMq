@@ -31,5 +31,7 @@ public class AddPersonIntegrationCommandHandler : IConsumer<AddPersonIntegration
         await _appDbContext.SaveChangesAsync(context.CancellationToken);
         
         _logger.LogInformation("Created user with id = {UserId}", person.Id);
+
+        throw new InvalidOperationException();
     }
 }
