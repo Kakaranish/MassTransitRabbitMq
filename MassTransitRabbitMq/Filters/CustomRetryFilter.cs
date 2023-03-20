@@ -17,9 +17,7 @@ public class CustomRetryFilter<T> : IFilter<ConsumeContext<T>> where T : class
 
     public async Task Send(ConsumeContext<T> context, IPipe<ConsumeContext<T>> next)
     {
-        context.AddOrUpdatePayload(() => new HandlerContextPayload(), existing => existing);
-
-        ConsumerMessageRetryConfiguration? retryConfig = null;
+        ConsumerMessageRetryConfiguration? retryConfig;
         try
         {
             await next.Send(context);

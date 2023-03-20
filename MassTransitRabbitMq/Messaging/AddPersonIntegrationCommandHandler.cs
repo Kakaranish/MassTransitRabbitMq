@@ -30,8 +30,16 @@ public class AddPersonIntegrationCommandHandler : IConsumer<AddPersonIntegration
         _appDbContext.Add(person);
         await _appDbContext.SaveChangesAsync(context.CancellationToken);
         
-        _logger.LogInformation("Created user with id = {UserId}", person.Id);
+        if (new Random().Next() == 2137)
+        {
+            throw new InvalidOperationException();
+        }
 
-        throw new InvalidOperationException();
+        if (new Random().Next() == 2137)
+        {
+            throw new NullReferenceException();
+        }
+        
+        _logger.LogInformation("Created user with id = {UserId}", person.Id);
     }
 }
